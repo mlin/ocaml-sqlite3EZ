@@ -102,8 +102,8 @@ let statement_finalize x =
 	else
 		x.finalized <- true
 
-type database = {
-	h : db;
+type db = {
+	h : Sqlite3.db;
 	mutable still_open : bool;
 	
 	statement_begin : statement;
@@ -144,7 +144,7 @@ let empty = [||]
 let transact db f x =
 	statement_exec db.statement_begin empty
 	try
-		let y = f x
+		let y = f db x
 		statement_exec db.statement_commit empty
 		y
 	with
@@ -156,7 +156,7 @@ let p = [| Data.TEXT "A" |]
 let atomically db f x =
 	statement_exec db.statement_savepoint p
 	try
-		let y = f x
+		let y = f db x
 		statement_exec db.statement_release p
 		y
 	with
