@@ -136,6 +136,17 @@ let db_close = function
 		ignore (db_close x.h)
 	| _ -> ()
 
+let with_db fn f x =
+	let db = db_open fn
+	try
+		let y = f db x
+		db_close db
+		y
+	with
+		| exn ->
+			try db_close db with exn' -> raise (Finally (exn,exn'))
+			raise exn
+
 let db_handle { h } = h
 
 let exec { h } sql = check_rc (exec h sql)
