@@ -1,4 +1,4 @@
-(** simplified wrapper for [Sqlite3] *)
+(** thin wrapper for [Sqlite3] with a more functional interface *)
 
 (** as Sqlite3.Rc *)
 module Rc : sig

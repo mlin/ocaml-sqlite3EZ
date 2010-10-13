@@ -1,0 +1,5 @@
+requires = "sqlite3"
+description = "thin wrapper for sqlite3 with a more functional interface"
+archive(byte)="sqlite3EZ.cma"
+archive(native)="sqlite3EZ.cmxa"
+
