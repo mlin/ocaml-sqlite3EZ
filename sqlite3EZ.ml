@@ -93,7 +93,7 @@ let statement_query statement parameters cons fold init =
 			check_rc !rc
 			!x
 			
-let statement_finalize_now x =
+let statement_finalize x =
 	if x.forced && not x.finalized then
 		let inst = instance x
 		if inst.in_progress then failwith "Sqlite3EZ: attempt to finalize in-progress statement"
@@ -130,7 +130,7 @@ let db_open fn =
 	Gc.finalise (function { still_open = true; h } -> ignore (db_close h) | _ -> ()) x
 	x
 
-let db_close_now = function
+let db_close = function
 	| x when x.still_open = true -> 
 		x.still_open <- false
 		ignore (db_close x.h)

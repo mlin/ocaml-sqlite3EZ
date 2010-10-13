@@ -22,7 +22,7 @@ type database
 val db_open : string -> database
 
 (** immediately close the database. The database connection will otherwise be closed when garbage-collected. *)
-val db_close_now : database -> unit
+val db_close : database -> unit
 
 (** [transact db f x] evaluates [f x] within a BEGIN..COMMIT transaction. If [f x] evaluates successfully to [y], the
 transaction is committed and [y] is returned. If the evaluation of [f x] raises an exception, the transaction is rolled
@@ -63,7 +63,7 @@ val statement_query : statement -> Data.t array -> (Data.t array -> 'a) -> ('a -
 
 (** immediately finalize the statement, releasing any associated resources. The statement will otherwise be finalized
 when garbage-collected. *)
-val statement_finalize_now : statement -> unit
+val statement_finalize : statement -> unit
 
 (**/**)
 val db_handle : database -> Sqlite3.db
