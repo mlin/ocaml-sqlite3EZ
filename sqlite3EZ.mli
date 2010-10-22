@@ -25,8 +25,8 @@ val db_open : string -> db
 garbage-collected. *)
 val db_close : db -> unit
 
-(** [with_db filename f] opens a database, applies [f], and returns [f]. The database is closed even
-if [f] raises an exception. *)
+(** [with_db filename f] opens a database, applies [f], and returns the result. The database is
+closed after [f] is evaluated, even if it raises an exception. *)
 val with_db : string -> (db -> 'a) -> 'a
 
 (** [transact db f] evaluates [f db] within a BEGIN..COMMIT transaction. If [f db] evaluates
