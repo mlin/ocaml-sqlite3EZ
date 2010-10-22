@@ -29,7 +29,7 @@ val db_close : db -> unit
 if [f] raises an exception. *)
 val with_db : string -> (db -> 'a) -> 'a
 
-(** [transact db f x] evaluates [f db] within a BEGIN..COMMIT transaction. If [f db] evaluates
+(** [transact db f] evaluates [f db] within a BEGIN..COMMIT transaction. If [f db] evaluates
 successfully to [y], the transaction is committed and [y] is returned. If the evaluation of [f db]
 raises an exception, the transaction is rolled back and the exception is re-raised.
 
