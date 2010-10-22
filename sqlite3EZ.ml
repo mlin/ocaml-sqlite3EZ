@@ -136,10 +136,10 @@ let db_close = function
 		ignore (db_close x.h)
 	| _ -> ()
 
-let with_db fn f x =
+let with_db fn f =
 	let db = db_open fn
 	try
-		let y = f db x
+		let y = f db
 		db_close db
 		y
 	with
@@ -152,10 +152,10 @@ let db_handle { h } = h
 let exec { h } sql = check_rc (exec h sql)
 
 let empty = [||]
-let transact db f x =
+let transact db f =
 	statement_exec db.statement_begin empty
 	try
-		let y = f db x
+		let y = f db
 		statement_exec db.statement_commit empty
 		y
 	with
@@ -164,10 +164,10 @@ let transact db f x =
 			raise exn
 
 let p = [| Data.TEXT "A" |]
-let atomically db f x =
+let atomically db f =
 	statement_exec db.statement_savepoint p
 	try
-		let y = f db x
+		let y = f db
 		statement_exec db.statement_release p
 		y
 	with
