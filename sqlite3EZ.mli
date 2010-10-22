@@ -25,19 +25,19 @@ val db_open : string -> db
 garbage-collected. *)
 val db_close : db -> unit
 
-(** [with_db filename f x] opens a database, applies [f] with the database and [x], closes the database, and returns what [f] returned. *)
+(** [with_db filename f] opens a database, applies [f], and returns [f]. The database is closed even
+if [f] raises an exception. *)
 val with_db : string -> (db -> 'a) -> 'a
 
-(** [transact db f x] evaluates [f db x] within a BEGIN..COMMIT transaction. If [f x] evaluates
-successfully to [y], the transaction is committed and [y] is returned. If the evaluation of [f x]
+(** [transact db f x] evaluates [f db] within a BEGIN..COMMIT transaction. If [f db] evaluates
+successfully to [y], the transaction is committed and [y] is returned. If the evaluation of [f db]
 raises an exception, the transaction is rolled back and the exception is re-raised.
 
 Note that BEGIN..COMMIT transactions cannot be nested in SQLite. Any attempt to make a nested call
 to [transact] will raise an exception. *)
 val transact : db -> (db -> 'a) -> 'a
 
-(** [atomically db f x] evaluates [f db x] within a SAVEPOINT..RELEASE transaction, which may be
-nested.
+(** [atomically db f] evaluates [f db] within a SAVEPOINT..RELEASE transaction, which may be nested.
 
 This implementation allows only parenthetically nested transactions, so there is no need to name
 savepoints. *)
