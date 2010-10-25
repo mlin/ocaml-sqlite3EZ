@@ -18,24 +18,30 @@ type statement_instance = {
 	mutable in_progress : bool;
 }
 
+type statement_status = New | Instantiated | Finalized
 type statement = {
 	lazy_inst : statement_instance Lazy.t;
-	mutable forced : bool;
-	mutable finalized : bool;
+	mutable status : statement_status;
 }
 
 let instance st =
-	if st.finalized then failwith "Sqlite3EZ: attempt to use finalized statement"
-	st.forced <- true
+	if st.status = Finalized then failwith "Sqlite3EZ: attempt to use finalized statement"
+	st.status <- Instantiated
 	Lazy.force st.lazy_inst
+
+let statement_finaliser = function
+	| { status = Instantiated; lazy_inst } as st ->
+		check_rc (finalize (Lazy.force lazy_inst).stmt)
+		st.status <- Finalized
+	| _ -> ()
 
 let make_statement' db sql =
 	let inst =
 		lazy
 			let stmt = prepare db sql
-			{stmt = stmt; parameter_count = bind_parameter_count stmt; in_progress = false}
-	let x = { lazy_inst = inst; forced = false; finalized = false }
-	Gc.finalise (function { forced = true; finalized = false; lazy_inst } -> ignore (finalize (Lazy.force lazy_inst).stmt) | _ -> ()) x
+			{stmt = stmt; parameter_count = bind_parameter_count stmt; in_progress = false }
+	let x = { lazy_inst = inst; status = New }
+	Gc.finalise statement_finaliser x
 	x
 
 let finally_reset statement f =
@@ -47,11 +53,13 @@ let finally_reset statement f =
 		let y = f instance
 		instance.in_progress <- false
 		check_rc (reset instance.stmt)
+		statement.status <- statement.status (* trick GC into keeping statement until now *)
 		y
 	with
 		| exn ->
 			instance.in_progress <- false
 			try check_rc (reset instance.stmt) with exn2 -> raise (Finally (exn,exn2))
+			statement.status <- statement.status (* trick GC into keeping statement until now *)
 			raise exn
 			
 
@@ -94,13 +102,10 @@ let statement_query statement parameters cons fold init =
 			!x
 			
 let statement_finalize x =
-	if x.forced && not x.finalized then
+	if x.status = Instantiated then
 		let inst = instance x
-		if inst.in_progress then failwith "Sqlite3EZ: attempt to finalize in-progress statement"
-		x.finalized <- true
-		ignore (finalize inst.stmt)
-	else
-		x.finalized <- true
+		check_rc (finalize inst.stmt)
+	x.status <- Finalized
 
 type db = {
 	h : Sqlite3.db;
@@ -115,6 +120,10 @@ type db = {
 	statement_rollback_to : statement;
 }
 
+let db_finaliser = function
+	| { still_open = true; h} -> ignore (db_close h)
+	| _ -> ()
+
 let db_open fn = 
 	let h = db_open fn
 	let x =
@@ -123,11 +132,11 @@ let db_open fn =
 			statement_begin = make_statement' h "BEGIN";
 			statement_commit = make_statement' h "COMMIT";
 			statement_rollback = make_statement' h "ROLLBACK";
-			statement_savepoint = make_statement' h "SAVEPOINT ?";
-			statement_release = make_statement' h "RELEASE ?";
-			statement_rollback_to = make_statement' h "ROLLBACK TO ?";
+			statement_savepoint = make_statement' h "SAVEPOINT a";
+			statement_release = make_statement' h "RELEASE a";
+			statement_rollback_to = make_statement' h "ROLLBACK TO a";
 			 } 
-	Gc.finalise (function { still_open = true; h } -> ignore (db_close h) | _ -> ()) x
+	Gc.finalise db_finaliser x
 	x
 
 let db_close = function
@@ -163,18 +172,17 @@ let transact db f =
 			try statement_exec db.statement_rollback empty with exn' -> raise (Finally (exn,exn'))
 			raise exn
 
-let p = [| Data.TEXT "A" |]
 let atomically db f =
-	statement_exec db.statement_savepoint p
+	statement_exec db.statement_savepoint [||]
 	try
 		let y = f db
-		statement_exec db.statement_release p
+		statement_exec db.statement_release [||]
 		y
 	with
 		| exn ->
 			try
-				statement_exec db.statement_rollback_to p
-				statement_exec db.statement_release p
+				statement_exec db.statement_rollback_to [||]
+				statement_exec db.statement_release [||]
 			with exn' -> raise (Finally (exn,exn'))
 			raise exn
 
