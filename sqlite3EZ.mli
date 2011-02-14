@@ -47,7 +47,7 @@ val atomically : db -> (db -> 'a) -> 'a
 *)
 val exec : db -> string -> unit
 
-(** as [Sqlite3.last_insert_rowid *)
+(** as [Sqlite3.last_insert_rowid] *)
 val last_insert_rowid : db -> Int64.t
 
 (** a compiled statement, can be either imperative or a query *)

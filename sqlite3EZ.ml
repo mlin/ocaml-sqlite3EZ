@@ -31,7 +31,7 @@ let instance st =
 
 let statement_finaliser = function
 	| { status = Instantiated; lazy_inst } as st ->
-		check_rc (finalize (Lazy.force lazy_inst).stmt)
+		ignore (finalize (Lazy.force lazy_inst).stmt)
 		st.status <- Finalized
 	| _ -> ()
 
