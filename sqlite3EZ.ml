@@ -133,11 +133,9 @@ let wrap_db h = { h = h;
 			statement_release = make_statement' h "RELEASE a";
 			statement_rollback_to = make_statement' h "ROLLBACK TO a";
 			 } 
-
-type open_flag = Sqlite3.open_flag
 	
-let db_open ?flags ?vfs fn =
-	let h = db_open_v2 ?flags ?vfs fn
+let db_open ?mode ?vfs fn =
+	let h = db_open ?mode ?vfs fn
 	let x = wrap_db h
 	Gc.finalise db_finaliser x
 	x
@@ -148,8 +146,8 @@ let db_close = function
 		ignore (db_close x.h)
 	| _ -> ()
 
-let with_db ?flags ?vfs fn f =
-	let db = db_open ?flags ?vfs fn
+let with_db ?mode ?vfs fn f =
+	let db = db_open ?mode ?vfs fn
 	try
 		let y = f db
 		db_close db

@@ -18,9 +18,7 @@ exception Finally of exn*exn
 
 type db
 
-type open_flag = Sqlite3.open_flag
-
-val db_open : ?flags:open_flag list -> ?vfs:string -> string -> db
+val db_open : ?mode:[ `READONLY | `NO_CREATE] -> ?vfs:string -> string -> db
 (** [as Sqlite3.db_open_v2] *)
 
 (** immediately close the database. The database connection will otherwise be closed when
@@ -29,7 +27,7 @@ val db_close : db -> unit
 
 (** [with_db filename f] opens a database, applies [f], and returns the result. The database is
 closed after [f] is evaluated, even if it raises an exception. *)
-val with_db : ?flags:open_flag list -> ?vfs:string -> string -> (db -> 'a) -> 'a
+val with_db : ?mode:[ `READONLY | `NO_CREATE] -> ?vfs:string -> string -> (db -> 'a) -> 'a
 
 (** [transact db f] evaluates [f db] within a BEGIN..COMMIT transaction. If [f db] evaluates
 successfully to [y], the transaction is committed and [y] is returned. If the evaluation of [f db]
