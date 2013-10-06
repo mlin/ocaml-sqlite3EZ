@@ -1,21 +1,38 @@
-LIBNAME = sqlite3EZ
+# OASIS_START
+# DO NOT EDIT (digest: bc1e05bfc8b39b664f29dae8dbd3ebbb)
 
-lib:
-	ocamlbuild ${LIBNAME}.cma ${LIBNAME}.cmxa
+SETUP = ocaml setup.ml
 
-install: lib
-	ocamlfind install ${LIBNAME} META _build/${LIBNAME}.cmi _build/${LIBNAME}.cma _build/${LIBNAME}.cmxa _build/${LIBNAME}.a
+build: setup.data
+	$(SETUP) -build $(BUILDFLAGS)
 
-uninstall:
-	ocamlfind remove ${LIBNAME}
+doc: setup.data build
+	$(SETUP) -doc $(DOCFLAGS)
 
-reinstall:
-	make uninstall
-	make install
+test: setup.data build
+	$(SETUP) -test $(TESTFLAGS)
 
-clean:
-	rm -f *~
-	ocamlbuild -clean
+all: 
+	$(SETUP) -all $(ALLFLAGS)
 
-doc:
-	ocamlbuild ${LIBNAME}.docdir/index.html
+install: setup.data
+	$(SETUP) -install $(INSTALLFLAGS)
+
+uninstall: setup.data
+	$(SETUP) -uninstall $(UNINSTALLFLAGS)
+
+reinstall: setup.data
+	$(SETUP) -reinstall $(REINSTALLFLAGS)
+
+clean: 
+	$(SETUP) -clean $(CLEANFLAGS)
+
+distclean: 
+	$(SETUP) -distclean $(DISTCLEANFLAGS)
+
+setup.data:
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+.PHONY: build doc test all install uninstall reinstall clean distclean configure
+
+# OASIS_STOP

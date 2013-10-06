@@ -1,5 +1,13 @@
+# OASIS_START
+# DO NOT EDIT (digest: 00125fa26c04ee59c23e0e0904827054)
+version = "0.1.0"
+description =
+"Thin wrapper for sqlite3-ocaml with a more functional interface"
 requires = "sqlite3"
-description = "thin wrapper for sqlite3 with a more functional interface"
-archive(byte)="sqlite3EZ.cma"
-archive(native)="sqlite3EZ.cmxa"
+archive(byte) = "sqlite3EZ.cma"
+archive(byte, plugin) = "sqlite3EZ.cma"
+archive(native) = "sqlite3EZ.cmxa"
+archive(native, plugin) = "sqlite3EZ.cmxs"
+exists_if = "sqlite3EZ.cma"
+# OASIS_STOP
 

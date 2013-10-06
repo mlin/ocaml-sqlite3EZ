@@ -1,2 +1,24 @@
-<**/*.ml> or <**/*.mli>: pp(ocaml+twt), pkg_sqlite3
-true: debug
+# OASIS_START
+# DO NOT EDIT (digest: 439325e758063968367da7670265ce74)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library sqlite3EZ
+"sqlite3EZ.cmxs": use_sqlite3EZ
+# Executable unit_tests
+<unit_tests.{native,byte}>: pkg_sqlite3
+<unit_tests.{native,byte}>: pkg_oUnit
+<*.ml{,i}>: pkg_sqlite3
+<*.ml{,i}>: pkg_oUnit
+# OASIS_STOP
+<*.ml{,i}>: pp(ocaml+twt)

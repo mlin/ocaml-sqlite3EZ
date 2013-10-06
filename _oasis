@@ -1,0 +1,28 @@
+OASISFormat: 0.3
+Name:        sqlite3EZ
+Version:     0.1.0
+Synopsis:    Thin wrapper for sqlite3-ocaml with a more functional interface
+Authors:     Mike Lin
+Maintainers: mlin@mlin.net
+License:     MIT
+Homepage:    https://github.com/mlin/ocaml-sqlite3EZ
+Plugins:     DevFiles (0.3), META (0.3)
+
+Library sqlite3EZ
+  Path:            .
+  BuildTools:      ocamlbuild
+  BuildDepends:    sqlite3
+  Modules:         Sqlite3EZ
+
+Executable unit_tests
+  Path:           .
+  MainIs:         unit_tests.ml
+  Install:        false
+  Build$:         flag(tests)
+  BuildTools:     ocamlbuild
+  BuildDepends:   sqlite3,oUnit
+  CompiledObject: best
+
+Test test
+  TestTools:   unit_tests
+  Command:     $unit_tests
