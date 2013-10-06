@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Sqlite3EZ" rel="Chapter" href="Sqlite3EZ.html"><title>Sqlite3EZ</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Sqlite3EZ.html">Sqlite3EZ</a></h1>
+
+<pre><span class="keyword">module</span> Sqlite3EZ: <code class="code">sig</code> <a href="Sqlite3EZ.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Thin wrapper for <code class="code">Sqlite3</code> with a simplified interface<br>
+<b>See also</b><ul><li><a href=" https://bitbucket.org/mmottl/sqlite3-ocaml ">sqlite3-ocaml</a></li>
+<li><a href=" http://mmottl.bitbucket.org/projects/sqlite3-ocaml/api/Sqlite3.html ">Sqlite3 (sqlite3-ocaml documentation)</a></li>
+</ul>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Sqlite3EZ.Rc.html">Rc</a>: <code class="code">sig</code> <a href="Sqlite3EZ.Rc.html">..</a> <code class="code">end</code></pre><div class="info">
+</div>
+
+<pre><span class="keyword">module</span> <a href="Sqlite3EZ.Data.html">Data</a>: <code class="code">sig</code> <a href="Sqlite3EZ.Data.html">..</a> <code class="code">end</code></pre><div class="info">
+</div>
+
+<pre><span id="EXCEPTIONRc"><span class="keyword">exception</span> Rc</span> <span class="keyword">of</span> <code class="type">Rc.t</code></pre>
+<div class="info ">
+raised whenever an SQLite operation returns an unsuccessful return code<br>
+</div>
+
+<pre><span id="EXCEPTIONFinally"><span class="keyword">exception</span> Finally</span> <span class="keyword">of</span> <code class="type">exn * exn</code></pre>
+<div class="info ">
+raised when we are trying to handle an exception and another exception is
+raised (e.g. we are executing a transaction, encounter an exception, and issue
+a ROLLBACK command, which itself fails)<br>
+</div>
+
+<pre><span id="TYPEdb"><span class="keyword">type</span> <code class="type"></code>db</span> </pre>
+
+
+<pre><span id="VALdb_open"><span class="keyword">val</span> db_open</span> : <code class="type">?mode:[ `NO_CREATE | `READONLY ] -><br>       ?mutex:[ `FULL | `NO ] -><br>       ?cache:[ `PRIVATE | `SHARED ] -> ?vfs:string -> string -> <a href="Sqlite3EZ.html#TYPEdb">db</a></code></pre><div class="info ">
+<code class="code">as Sqlite3.db_open</code><br>
+</div>
+
+<pre><span id="VALdb_close"><span class="keyword">val</span> db_close</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> unit</code></pre><div class="info ">
+immediately close the database. The database connection will otherwise be
+closed when garbage-collected.<br>
+</div>
+
+<pre><span id="VALwith_db"><span class="keyword">val</span> with_db</span> : <code class="type">?mode:[ `NO_CREATE | `READONLY ] -><br>       ?mutex:[ `FULL | `NO ] -><br>       ?cache:[ `PRIVATE | `SHARED ] -><br>       ?vfs:string -> string -> (<a href="Sqlite3EZ.html#TYPEdb">db</a> -> 'a) -> 'a</code></pre><div class="info ">
+<code class="code">with_db filename f</code> opens a database, applies <code class="code">f</code>, and returns the
+result. The database is closed after <code class="code">f</code> is evaluated, even if it raises an
+exception.<br>
+</div>
+
+<pre><span id="VALtransact"><span class="keyword">val</span> transact</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> (<a href="Sqlite3EZ.html#TYPEdb">db</a> -> 'a) -> 'a</code></pre><div class="info ">
+<code class="code">transact db f</code> evaluates <code class="code">f db</code> within a BEGIN..COMMIT transaction. If <code class="code">f
+db</code> evaluates successfully to <code class="code">y</code>, the transaction is committed and <code class="code">y</code> is
+returned. If the evaluation of <code class="code">f db</code> raises an exception, the transaction is
+rolled back and the exception is re-raised.
+<p>
+
+Note that BEGIN..COMMIT transactions cannot be nested in SQLite. Any attempt
+to make a nested call to <code class="code">transact</code> will raise an exception.<br>
+</div>
+
+<pre><span id="VALatomically"><span class="keyword">val</span> atomically</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> (<a href="Sqlite3EZ.html#TYPEdb">db</a> -> 'a) -> 'a</code></pre><div class="info ">
+<code class="code">atomically db f</code> evaluates <code class="code">f db</code> within a SAVEPOINT..RELEASE
+transaction, which may be nested.
+<p>
+
+This implementation allows only parenthetically nested transactions, so there
+is no need to name savepoints.<br>
+</div>
+
+<pre><span id="VALexec"><span class="keyword">val</span> exec</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> string -> unit</code></pre><div class="info ">
+execute some imperative SQL statement(s). Multiple statements may be
+separated by a semicolon.<br>
+</div>
+
+<pre><span id="VALlast_insert_rowid"><span class="keyword">val</span> last_insert_rowid</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> Int64.t</code></pre><div class="info ">
+as <code class="code">Sqlite3.last_insert_rowid</code><br>
+</div>
+
+<pre><span id="VALchanges"><span class="keyword">val</span> changes</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> int</code></pre><div class="info ">
+as <code class="code">Sqlite3.changes</code><br>
+</div>
+
+<pre><span id="TYPEstatement"><span class="keyword">type</span> <code class="type"></code>statement</span> </pre>
+<div class="info ">
+a compiled statement, can be either imperative or a query<br>
+</div>
+
+
+<pre><span id="VALmake_statement"><span class="keyword">val</span> make_statement</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEdb">db</a> -> string -> <a href="Sqlite3EZ.html#TYPEstatement">statement</a></code></pre><div class="info ">
+prepare a statement from the SQL text. The given string must contain only
+one SQL statement. The statement can be used multiple times (calls to
+<code class="code">Sqlite3.reset</code> are handled automatically). The statement is not actually
+compiled until its first use.<br>
+</div>
+
+<pre><span id="VALstatement_exec"><span class="keyword">val</span> statement_exec</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEstatement">statement</a> -> Data.t array -> unit</code></pre><div class="info ">
+bind the given parameters and execute an imperative statement. An
+exception is raised if the statement attempts to return result rows.<br>
+</div>
+
+<pre><span id="VALstatement_query"><span class="keyword">val</span> statement_query</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEstatement">statement</a> -><br>       Data.t array -><br>       (Data.t array -> 'a) -> ('a -> 'b -> 'b) -> 'b -> 'b</code></pre><div class="info ">
+<code class="code">statement_query stmt params cons fold init</code> binds the given parameters
+and executes a query. Each result row is first passed to <code class="code">cons</code>, which will
+usually construct a value from the data. This value is then passed to <code class="code">fold</code>
+along with an intermediate value, which is <code class="code">init</code> for the first row. This can
+used to build a list or other data structure from all the results.<br>
+</div>
+
+<pre><span id="VALstatement_finalize"><span class="keyword">val</span> statement_finalize</span> : <code class="type"><a href="Sqlite3EZ.html#TYPEstatement">statement</a> -> unit</code></pre><div class="info ">
+immediately finalize the statement, releasing any associated resources.
+The statement will otherwise be finalized when garbage-collected.<br>
+</div>
+</body></html>
