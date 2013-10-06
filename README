@@ -1,8 +1,0 @@
-ocaml-sqlite3EZ
-http://github.com/mlin/ocaml-sqlite3EZ
-
-A thin wrapper for ocaml-sqlite3 with a more functional interface. Resource management is handled by the garbage
-collector, transactions can be hooked up to exception handling, etc.
-
-Requires: OCaml 3.12+, ocaml-sqlite3 1.5.7+, and ocaml+twt 0.93+
-
