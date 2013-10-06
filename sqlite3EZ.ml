@@ -134,8 +134,8 @@ let wrap_db h = { h = h;
 			statement_rollback_to = make_statement' h "ROLLBACK TO a";
 			 } 
 	
-let db_open ?mode ?vfs fn =
-	let h = db_open ?mode ?vfs fn
+let db_open ?mode ?mutex ?cache ?vfs fn =
+	let h = db_open ?mode ?mutex ?cache ?vfs fn
 	let x = wrap_db h
 	Gc.finalise db_finaliser x
 	x
@@ -146,8 +146,8 @@ let db_close = function
 		ignore (db_close x.h)
 	| _ -> ()
 
-let with_db ?mode ?vfs fn f =
-	let db = db_open ?mode ?vfs fn
+let with_db ?mode ?mutex ?cache ?vfs fn f =
+	let db = db_open ?mode ?mutex ?cache ?vfs fn
 	try
 		let y = f db
 		db_close db
@@ -188,5 +188,7 @@ let atomically db f =
 			raise exn
 
 let last_insert_rowid db = last_insert_rowid db.h
+
+let changes db = changes db.h
 
 let make_statement { h } sql = make_statement' h sql

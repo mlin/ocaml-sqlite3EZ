@@ -3,3 +3,4 @@ setup.data
 setup.log
 *.native
 *.byte
+sqlite3EZ.docdir
