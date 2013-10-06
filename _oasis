@@ -26,3 +26,11 @@ Executable unit_tests
 Test test
   TestTools:   unit_tests
   Command:     $unit_tests
+
+Document sqlite3EZ
+  Title:                Sqlite3EZ API reference
+  Type:                 OCamlbuild (0.3)
+  InstallDir:           $docdir
+  BuildTools:           ocamlbuild,ocamldoc
+  XOCamlbuildPath:      .
+  XOCamlbuildLibraries: sqlite3EZ
