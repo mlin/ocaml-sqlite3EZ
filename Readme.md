@@ -10,7 +10,7 @@ handled by the garbage collector, etc.
 ocaml-sqlite3EZ is available in [OPAM](http://opam.ocamlpro.com):
 `opam install sqlite3EZ`. The findlib package name is also `sqlite3EZ`.
 
-Manual build (with ocamlfind): Install
+Manual build (with findlib): Install
 [sqlite3-ocaml](https://bitbucket.org/mmottl/sqlite3-ocaml) and
 [ocaml+twt](https://github.com/mlin/twt);
 `./configure && make && make install`
