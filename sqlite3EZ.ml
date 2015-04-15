@@ -219,3 +219,11 @@ let column_names stmt =
   Array.init
       column_count instance.stmt
       column_name instance.stmt
+
+let with_statement db ~sql f =
+  let stmt = make_statement db sql
+  let r =
+    try ignore (instance stmt); f stmt
+    with e -> statement_finalize stmt; raise e
+  statement_finalize stmt
+  r

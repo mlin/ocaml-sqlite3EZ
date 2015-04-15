@@ -92,5 +92,10 @@ val statement_query : statement -> Data.t array -> (Data.t array -> 'a) -> ('a -
 The statement will otherwise be finalized when garbage-collected. *)
 val statement_finalize : statement -> unit
 
+(** [with_statement db ~sql f] prepare and compiles a statement from the [sql],
+    applies [f], and finalizes the statement even if [f] raises an exception.
+*)
+val with_statement : db -> sql:string -> (statement -> 'a) -> 'a
+
 (**/**)
 val db_handle : db -> Sqlite3.db
