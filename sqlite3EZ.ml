@@ -1,4 +1,3 @@
-open List
 open Sqlite3
 
 module Rc = Sqlite3.Rc
@@ -121,7 +120,7 @@ type db = {
 }
 
 let db_finaliser = function
-	| { still_open = true; h} -> ignore (db_close h)
+	| { still_open = true; h; _ } -> ignore (db_close h)
 	| _ -> ()
 
 let wrap_db h = { h = h;
@@ -157,9 +156,9 @@ let with_db ?mode ?mutex ?cache ?vfs fn f =
 			try db_close db with exn' -> raise (Finally (exn,exn'))
 			raise exn
 
-let db_handle { h } = h
+let db_handle { h; _ } = h
 
-let exec { h } sql = check_rc (exec h sql)
+let exec { h; _ } sql = check_rc (exec h sql)
 
 let empty = [||]
 let transact db f =
@@ -191,7 +190,7 @@ let last_insert_rowid db = last_insert_rowid db.h
 
 let changes db = changes db.h
 
-let make_statement { h } sql = make_statement' h sql
+let make_statement { h; _ } sql = make_statement' h sql
 
 let named_parameters stmt alist =
   let instance = instance stmt
