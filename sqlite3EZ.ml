@@ -192,3 +192,30 @@ let last_insert_rowid db = last_insert_rowid db.h
 let changes db = changes db.h
 
 let make_statement { h } sql = make_statement' h sql
+
+let named_parameters stmt alist =
+  let instance = instance stmt
+  let arr = Array.init instance.parameter_count (fun _ -> None)
+  List.iter
+    fun (name, data) ->
+      let idx = bind_parameter_index instance.stmt name
+      if arr.(idx) = None then
+        arr.(idx) <- Some data
+      else
+        failwith ("Duplicate bind parameter: " ^ name)
+    alist
+  Array.mapi
+    fun i -> function
+      | Some v -> v
+      | None ->
+        let name = match bind_parameter_name instance.stmt i with
+          | Some v -> v
+          | None -> string_of_int i
+        failwith ("Parameter not bound: " ^ name)
+    arr
+
+let column_names stmt =
+  let instance = instance stmt
+  Array.init
+      column_count instance.stmt
+      column_name instance.stmt
