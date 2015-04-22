@@ -1,4 +1,3 @@
-open List
 open Sqlite3
 
 module Rc = Sqlite3.Rc
@@ -121,7 +120,7 @@ type db = {
 }
 
 let db_finaliser = function
-	| { still_open = true; h} -> ignore (db_close h)
+	| { still_open = true; h; _ } -> ignore (db_close h)
 	| _ -> ()
 
 let wrap_db h = { h = h;
@@ -157,9 +156,9 @@ let with_db ?mode ?mutex ?cache ?vfs fn f =
 			try db_close db with exn' -> raise (Finally (exn,exn'))
 			raise exn
 
-let db_handle { h } = h
+let db_handle { h; _ } = h
 
-let exec { h } sql = check_rc (exec h sql)
+let exec { h; _ } sql = check_rc (exec h sql)
 
 let empty = [||]
 let transact db f =
@@ -191,4 +190,39 @@ let last_insert_rowid db = last_insert_rowid db.h
 
 let changes db = changes db.h
 
-let make_statement { h } sql = make_statement' h sql
+let make_statement { h; _ } sql = make_statement' h sql
+
+let named_parameters stmt alist =
+  let instance = instance stmt
+  let arr = Array.init instance.parameter_count (fun _ -> None)
+  List.iter
+    fun (name, data) ->
+      let idx = bind_parameter_index instance.stmt name
+      if arr.(idx) = None then
+        arr.(idx) <- Some data
+      else
+        failwith ("Duplicate bind parameter: " ^ name)
+    alist
+  Array.mapi
+    fun i -> function
+      | Some v -> v
+      | None ->
+        let name = match bind_parameter_name instance.stmt i with
+          | Some v -> v
+          | None -> string_of_int i
+        failwith ("Parameter not bound: " ^ name)
+    arr
+
+let column_names stmt =
+  let instance = instance stmt
+  Array.init
+      column_count instance.stmt
+      column_name instance.stmt
+
+let with_statement db ~sql f =
+  let stmt = make_statement db sql
+  let r =
+    try ignore (instance stmt); f stmt
+    with e -> statement_finalize stmt; raise e
+  statement_finalize stmt
+  r

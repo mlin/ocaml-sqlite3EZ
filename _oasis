@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        sqlite3EZ
-Version:     0.1.0
+Version:     0.2.0
 Synopsis:    Thin wrapper for sqlite3-ocaml with a simplified interface
 Authors:     Mike Lin
 Maintainers: mlin@mlin.net

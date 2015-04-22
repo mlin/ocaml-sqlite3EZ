@@ -69,6 +69,14 @@ one SQL statement. The statement can be used multiple times (calls to
 compiled until its first use. *)
 val make_statement : db -> string -> statement
 
+(** [named_parameters stmt alist] takes an association list [alist]
+    of named bind parameters with data and builds a data array
+    that can be bound to the given [stmt] *)
+val named_parameters : statement -> (string * Data.t) list -> Data.t array
+
+(** [column_names stmt] returns the header of all columns in [stmt] *)
+val column_names : statement -> string array
+
 (** bind the given parameters and execute an imperative statement. An
 exception is raised if the statement attempts to return result rows. *)
 val statement_exec : statement -> Data.t array -> unit
@@ -83,6 +91,11 @@ val statement_query : statement -> Data.t array -> (Data.t array -> 'a) -> ('a -
 (** immediately finalize the statement, releasing any associated resources.
 The statement will otherwise be finalized when garbage-collected. *)
 val statement_finalize : statement -> unit
+
+(** [with_statement db ~sql f] prepare and compiles a statement from the [sql],
+    applies [f], and finalizes the statement even if [f] raises an exception.
+*)
+val with_statement : db -> sql:string -> (statement -> 'a) -> 'a
 
 (**/**)
 val db_handle : db -> Sqlite3.db
